@@ -1,0 +1,27 @@
+{
+    "development": {
+        "host": "",
+        "port": ,
+        "database": "",
+        "username": "",
+        "password": "",
+        "dialect": "",
+        "define": {
+            "freezeTableName": true,
+            "timestamps": false
+        }
+    },
+    "test": {},
+    "production": {
+        "host": "",
+        "port": ,
+        "database": "",
+        "username": "",
+        "password": "",
+        "dialect": "",
+        "define": {
+            "freezeTableName": true,
+            "timestamps": false
+        }
+    }
+}
