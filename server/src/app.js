@@ -10,6 +10,7 @@ var bodyParser = require('body-parser');
 var devConfig = require('../config/localConfig.json')['development'];
 var models = require('../services/models');
 const multer = require("multer");
+var expressValidator = require('express-validator');
 
 // Node express server setup.
 var server = express();
@@ -51,10 +52,10 @@ server.use(allowCrossDomain);
 
 // parse application/json
 server.use(bodyParser.json());
-
 server.use(bodyParser.urlencoded({
   extended: false
 }));
+// server.use(expressValidator());
 
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../public/uploads/'),
@@ -65,7 +66,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage }).single('file');
 
-const appRoutes = require('../services/routes/routes.js')(server, upload);
+const employeeRoutes = require('../services/routes/employeeroutes.js')(server, upload);
+const addressRoutes = require('../services/routes/addressroutes')(server, upload);
+const userRoutes = require('../services/routes/userroutes')(server, upload);
+
+// appRouter.use('/employee', employeeRoutes);
+// appRouter.use('/employeeaddress', addressRoutes);
 
 // validate auth token here.
 server.use(function (req, res, next) {
