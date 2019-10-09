@@ -6,35 +6,25 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const filterOrder = require('./filterOrderUtils');
 
-var tblmapping = {'employee':models.employee};
-
 module.exports = {
     getAllEmployee: async function(req, res, next) {
         try {
+            //Assuming that below fields are passed from UI : tableName, ui_filters,order_filters and operation_type
             var tableName = 'employee';
             var ui_filters = [
-                {
-                    'column':'firstName',
-                    'value' : 'Sachin',
-                    'comparison':'eq'
-                },
-                {
-                    'column':'designation',
-                    'value' : 'Soft',
-                    'comparison':'like'
-                }
-            ]
-
+                {'column':'firstName','value' : 'Sachin','comparison':'eq'},
+                {'column':'designation','value' : 'Crick','comparison':'like'},
+                {'column':'age','value' : '30','comparison':'gt'}
+            ];
             var order_filters = [
                 {"column": "firstName", "order": "ASC"}, 
                 {"column": "designation", "order": "ASC"}
             ];
+            operation_type = 'and';
 
-            operation_type = 'or';
             fltr_list = filterOrder.getFilterCriteria(ui_filters);
             order_list = filterOrder.getOrderCriteria(order_filters);
             
-            console.log('operation_type :' + operation_type);
             if(operation_type == 'and') {
                 var fltr_obj = {
                     // where: { [Op.and]:fltr_list }, order: [['firstName', 'ASC'],['designation', 'ASC']]
@@ -45,13 +35,9 @@ module.exports = {
                     // where: { [Op.and]:fltr_list }, order: [['firstName', 'ASC'],['designation', 'ASC']]
                     where: { [Op.or]:fltr_list }, order: order_list
                 }
-            }
-
-            console.log('filterCriteria : ' + fltr_obj);           
+            }   
             var result = await getAllEmployeeFromDB(req, res, tableName, fltr_obj);
             res.status(200);
-           
-            console.log(JSON.stringify(result));
             return res.json({status: "success", message: "Employee Found!!!", employee: result});
         } catch(err) {
             res.status(500);
@@ -113,35 +99,19 @@ module.exports = {
 // to get all employee
 function getAllEmployeeFromDB(req, res, tableName, fltr_obj) {
     return new Promise(function(resolve, reject) {
-        
-            console.log('filterCriteria :' + fltr_obj);
-            console.log('filterCriteria :' + fltr_obj);
-            // console.log('orderCriteria :' + JSON.stringify(orderCriteria));
-            // AND where clause
+        result = filterOrder.getModel(tableName).findAll({include: [{model: models.address,
+                                            as: 'address'}],fltr_obj});
             // result = models.employee.findAll({include: [{model: models.address,
             //                                 as: 'address'}],
             //                                 where: filterCriteria,
             //                                 order: [['firstName', 'ASC']]});
-            // OR where clause
-            result = getModel(tableName).findAll(fltr_obj);
             // {
-                // result = models.employee.findAll({where: { [Op.and]: [ { firstName: { [Op.eq]: 'Sachin'} },{ lastName: { [Op.eq]: 'Tendulkar'} } ] },
-                //                                     order: [['firstName', 'ASC']]});
-                // result = models.employee.findAll({where: { and: {firstName:{[Op.eq]:Sachin}},{lastName:{[Op.eq]:Awari}} );
-                // result = models.employee.findAll({where: {"firstName":"Sachin","lastName":"Tendulkar"}});
-                // where: Sequelize.literal(filterCriteria),
-                // where: {firstName: {$in: empCriteria,}}
-                // where: Sequelize.and({firstName:'Virat'})
-                // order: Sequelize.literal(orderCriteria)
-            // }
-            console.log('result : ' + JSON.stringify(result));
+            // result = models.employee.findAll({where: { [Op.and]: [ { firstName: { [Op.eq]: 'Sachin'} },{ lastName: { [Op.eq]: 'Tendulkar'} } ] },
+            //                                     order: [['firstName', 'ASC']]});
+            // result = models.employee.findAll({where: {"firstName":"Sachin","lastName":"Tendulkar"}});
+
             resolve(result);
     });
-}
-
-function getModel(tableName){
-    console.log('tableName:'+ tableName);
-    return tblmapping[tableName];
 }
 
 // // to get all employee
@@ -158,7 +128,7 @@ function getModel(tableName){
 // get employee by primery key
 function getEmployeeByPkFromDB(req, res, tableName) {
     return new Promise(function(resolve, reject) {
-            let result = getModel(tableName).findByPk(req.params.id);
+            let result = filterOrder.getModel(tableName).findByPk(req.params.id);
             resolve(result);
     })
 }
@@ -179,7 +149,7 @@ function getEmployeeByPkFromDB(req, res, tableName) {
 // to add employee
 function addEmployeeToDB(req, res, tableName) {
     return new Promise(function(resolve, reject) {
-            let result = getModel(tableName).create(req.body);
+            let result = filterOrder.getModel(tableName).create(req.body);
             resolve(result);
     })
 }
@@ -202,7 +172,7 @@ function addEmployeeToDB(req, res, tableName) {
 // upadate an employee in DB
 function udpateEmployeeToDB(req, res, tableName) {
     return new Promise(function(resolve, reject) {
-            let result = getModel(tableName).update(req.body,
+            let result = filterOrder.getModel(tableName).update(req.body,
                     { where: {
                             id: req.params.id
                         }
@@ -248,7 +218,7 @@ function udpateEmployeeToDB(req, res, tableName) {
 // to delete an employee
 function deleteEmployeeFromDB(req, res, tableName) {
     return new Promise(function(resolve, reject) {
-            let result = getModel(tableName).destroy({
+            let result = filterOrder.getModel(tableName).destroy({
                 where: { id: req.params.id }
             });
             resolve(result);

@@ -19,6 +19,9 @@ module.exports = function (sequelize, DataTypes) {
         designation: {
             type: DataTypes.STRING(50)
         },
+        age: {
+            type: DataTypes.INTEGER
+        },
         active: {
             type: DataTypes.BOOLEAN
         }

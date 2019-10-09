@@ -1,9 +1,16 @@
 const path = require("path");
-// var querystring = require('querystring');
+const models = require('../models');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
+var tblmapping = {'employee':models.employee,'user':models.user,'address':models.address};
+
 module.exports = {  
+
+    getModel: function (tableName){
+        console.log('tableName:'+ tableName);
+        return tblmapping[tableName];
+    },
 
     getOperationType: function(ui_filters) {
         var operation_type
@@ -113,9 +120,8 @@ function getFilterObj(ui_filter) {
 function getOrderObj(order_filter) {
     var order_obj;
 
-    var col = order_filter['column']
-    var order_type = order_filter['order']
-
+    var col = order_filter['column'];
+    var order_type = order_filter['order'];
     order_obj = [col, order_type];
     return order_obj;
 }
